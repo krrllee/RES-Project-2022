@@ -8,4 +8,7 @@ while True:
         cliensocket,address = s.accept()
         print(f"Connection from {address} has been established!")
         cliensocket.send(bytes("Welcome, writer.","utf-8"))
-        cliensocket.close()
+        rec = cliensocket.recv(1024)
+       
+
+cliensocket.close()
