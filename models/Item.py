@@ -7,5 +7,5 @@ class Item:
         self.code = code
         self.value = value
 
-items = list(Item)
+
 

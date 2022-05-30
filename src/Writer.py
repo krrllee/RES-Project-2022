@@ -2,7 +2,9 @@ import socket
 import pickle
 import time
 import random
-from Item import Item
+
+
+from models import Item as Item
 
 HEADERSIZE = 10
 
