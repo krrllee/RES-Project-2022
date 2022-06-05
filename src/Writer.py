@@ -5,6 +5,8 @@ from sqlite3 import connect
 import time
 import random
 
+#Treba da se napravi odredjena memorija ili lokacija gde ce se nalaziti podaci o aktivnim workerima da bi
+#mogli da se gase i pale
 
 from models import Item as Item
 
