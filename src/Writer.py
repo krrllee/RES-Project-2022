@@ -11,7 +11,8 @@ import random
 from models import Item as Item
 
 HEADERSIZE = 10
-LOCALHOST = socket.gethostbyname(socket.gethostname())
+#LOCALHOST = socket.gethostbyname(socket.gethostname())
+LOCALHOST = 'localhost'
 PORT = 1234
 listaKodova = ["CODE_ANALOG","CODE_DIGITAL","CODE_CUSTOM","CODE_LIMITSET","CODE_SINGLENOE","CODE_MULTIPLENODE","CODE_CONSUMER","CODE_SOURCE"]
 
@@ -27,20 +28,33 @@ class Writer:
         self.sock, self.konektovana_adresa = self.sock.connect((self.server_adresa,PORT))
 
 
-    def Komande(self):
-        while(True):
-            print("\n\t1 - UPALI\n \t2 - UGASI")
-            opcija=int(input())
-            poruka=""
-            if(opcija==1):
-                poruka="Upali"
-            elif(opcija==2):
-                poruka="Ugasi"
-            else:
-                print("\t Zadata opcija ne postoji.")
+    def UGASI(self,id:int):
+    #connect.UGASIWORKERA(id)
+        print(f"WORKER SA ID:{id} je upaljen")
 
-            if poruka!="" :
-                self.socket.connect(self.server_addres)
+    def UPALI(self,id:int):
+    #connect.UPALIWORKERA(id)
+        print(f"WORKER SA ID:{id} je ugasen")
+
+    def Komanda(self):
+        while True:
+            data = input("Unesite komandu u formatu: UPALI/UGASI:BROJ \n ")
+            commands = data.split(":") # commands = ["UPALI","0"]
+            print(f"UNETA OPCIJA: {commands[0]} \n WORKER-ID: {commands[1]}")
+
+            id=int(commands[1])
+
+            match commands[0]:
+                case "UPALI":
+                    self.UPALI(id)
+                case "UGASI":
+                    self.UGASI(id)
+                case _:
+                    print("NIJE UNETA DOBRA OPCIJA")
+
+    def start(self):
+        #ovde treba implementirati sta radi metoda start
+        return NotImplementedError
                 
 
     def saljiPodatke(self):
@@ -55,9 +69,13 @@ class Writer:
     def PrimiPodatke(self):
         msg = self.sock.recv(1024)
         msg = msg.decode("utf-8")
-def main():
-    writer1 = Writer(LOCALHOST)
-    writer1.saljiPodatke()
+
+
+
+def main():                 #bolje ovako
+    adresa = (LOCALHOST,PORT)
+    writer1 = Writer(adresa)
+    writer1.start()
 
 if __name__ == "__main__":
     main()
