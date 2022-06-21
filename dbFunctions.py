@@ -13,7 +13,7 @@ class DBFunctions:
         return True
     
 
-    def createTable(self,dataset):      #Radi,vraca true
+    def createTable(self,dataset):      
         try:
             self.connection.execute(f"""
                 CREATE TABLE dataset{dataset}
@@ -27,7 +27,7 @@ class DBFunctions:
         except:
             pass
 
-    def entityExistance(self,id,dataset):               #Radi
+    def entityExistance(self,id,dataset):               
         retVal = self.connection.execute(f"""
             SELECT id,code,value,timestamp
             FROM dataset{dataset}
@@ -46,7 +46,7 @@ class DBFunctions:
             """)
         self.connection.commit()
 
-    def getValue(self,id,dataset):                  #Radi no such table: dataset2
+    def getValue(self,id,dataset):                 
         retVal = self.connection.execute(f"""
             SELECT value
             FROM dataset{dataset}
@@ -55,11 +55,11 @@ class DBFunctions:
         value,=retVal.fetchall()[0]
         return value
 
-    def getDeadband(self,oldValue,newValue):            #Radi
+    def getDeadband(self,oldValue,newValue):            
         deadband = abs(newValue-oldValue)/ oldValue * 100
         return deadband
 
-    def InsertIntoTable(self,id,code,value,dataset):    #Radi
+    def InsertIntoTable(self,id,code,value,dataset):   
         timestamp = datetime.now()
         self.connection.execute(f"""
             INSERT INTO dataset{dataset} (id,code,value,timestamp)
@@ -67,14 +67,3 @@ class DBFunctions:
             """)
         self.connection.commit()
 
-if __name__ == "__main__":
-    db = DBFunctions()
-    dataset = 2
-try:
-    db.dbConnect(dataset)
-    x=db.updateTable(2,2,4,5)
-except Exception as e:
-        print(e)
-else:
-    print(x)
-    print("Uspeo dbCONNECT")
