@@ -33,16 +33,15 @@ class Writer:
                    self.s.connect(self.adresa)
                    poruka = poruka.encode()
                    self.s.send(poruka)
+                   time.sleep(2)
                    print("Poruka poslata.")
-
                    
             except ValueError:
                 print("Morate uneti broj!")
             except Exception as e:
                 print("Konekcija nije uspostavljena.")
                 print(e)
-
-            self.s.close()
+        self.s.close()
 
                    
 
