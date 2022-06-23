@@ -9,26 +9,31 @@ class Reader:
             try:
                 komanda = int(input())
                 if(komanda == 1):
-                    self.pretragaPoKodu()
+                    data = self.pretragaPoKodu()
+                    for d in data:
+                        print(f"\n{d}\n")
                 if(komanda == 2):
-                    self.pretragaPoIntervalu()
+                    data = self.pretragaPoIntervalu()
+                    for d in data:
+                        print(f"\n{d}\n")
                 else:
-                    print("Nepostojeca komanda.")
-            except:
+                   print("Nepostojeca komanda.")
+            except Exception as e:
+                print(e)
                 exit()
-                
-
+            
 
     def pretragaPoKodu(self):
         db = DBFunctions()
         print("Unesi kod: ")
         code = str(input())
-        if((code != "CODE_ANALOG") and (code != "CODE_DIGITAL") and (code !="CODE_CUSTOM") and (code != "CODE_LIMITSET") and (code != "CODE_SINGLENOE") and (code !="CODE_MULTIPLENODE")and(code!="CODE_CONSUMER")and(code!="CODE_SOURCE")):
+        if((code != "CODE_ANALOG") and (code != "CODE_DIGITAL") and (code !="CODE_CUSTOM") and (code != "CODE_LIMITSET") and (code != "CODE_SINGLENODE") and (code !="CODE_MULTIPLENODE")and(code!="CODE_CONSUMER")and(code!="CODE_SOURCE")):
             print("Nepostojeci kod.")
 
         dataset = self.getDataSet(code)
 
         retVal = db.getDataFromCode(code,dataset)
+        
         
 
         return retVal
