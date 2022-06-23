@@ -55,7 +55,7 @@ class DBFunctions:
         self.connection.commit()
 
     def getValue(self,id,dataset):
-        retVal = self.connection.execute(f"""
+        self.cur.execute(f"""
             SELECT value
             FROM dataset{dataset}
             WHERE id = {id}
@@ -64,18 +64,21 @@ class DBFunctions:
         return value
 
     def getDataFromCode(self,code,dataset):
+        self.dbConnect()
+
         retVal = self.connection.execute(f"""
             SELECT id,code,value,timestamp
             FROM dataset{dataset}
-            WHERE code = {code}
+            WHERE code = '{code}'
             """)
         return retVal.fetchall()
 
     def getDataFromTimestamp(self,firstTimestamp,secondTimestamp,dataset):
+        self.dbConnect()
         retVal = self.connection.execute(f"""
             SELECT id,code,value,timestamp
             FROM dataset{dataset}
-            WHERE timestamp BETWEEN '{firstTimestamp}' AND '{secondTImestamp}'
+            WHERE timestamp BETWEEN '{firstTimestamp}' AND '{secondTimestamp}'
             """)
         return retVal.fetchall()
                
