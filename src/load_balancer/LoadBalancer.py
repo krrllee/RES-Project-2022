@@ -17,7 +17,8 @@ class LoadBalancer:
         return s
 
     def primiPodatke(self,conn):
-        return conn.recv(2048)
+        data =  conn.recv(2048)
+        return data
 
     def otpakujPodatke(self,data):
         return data.decode()
@@ -29,14 +30,15 @@ class LoadBalancer:
         return poruka.split(":")[1] + ":" + poruka.split(":")[2]
 
     def smjestiPodatke(self,localBuffer,data):
-        if(len(localBuffer)>=10):
+        try:
+            localBuffer.append(data)
+            return True
+        except:
             return False
-        localBuffer.append(data)
-        
-        return True
 
     def pokreniWorkerApp(self,file):
-        os.system(file)
+        
+        os.startfile(file)
 
     def pokreniWorker(self,file):
         try:
@@ -98,7 +100,11 @@ class LoadBalancer:
                 conn,adresa = cSocket.accept()
                 povezaniKlijenti.append(conn)
                 cThread = Thread(target=self.handle,args=(conn,adresa,povezaniKlijenti,localBuffer,povezaniWorkeri,dostupniWorkeri))
+                print("Thread kreiran")
                 cThread.start()
+                print("Thread pokrenut")
+                cThread.join()
+                print("Thread zavrsen")
         except:
             exit()
 
@@ -116,30 +122,45 @@ class LoadBalancer:
             data = self.primiPodatke(conn)
             
             if(data):
+                
                 poruka = self.otpakujPodatke(data)
                 print(poruka)
                 komanda = self.primiKomandu(poruka)
                 if(komanda == "Poslato"):
+                    print("Usao sam u if POSLATO")
                     params = self.uzmiParametre(poruka)
-                    self.mutexBuffer.acquire()
+                    print("Uzeo sam parametre:"+params)
+                    #self.mutexBuffer.acquire()
+                    print("prosao semafor")
                     smjestenPodatak = self.smjestiPodatke(localBuffer,params)
-                    self.mutexBuffer.release()
+                    print(str(smjestenPodatak))
+                    if(smjestenPodatak):
+                        print("Spremljeno.")
+                    #self.mutexBuffer.release()
                     self.ugasiKlijenta(conn,povezaniKlijenti)
-                    
+                    break
 
                 elif(komanda == "UPALI"):
                     path = os.path.dirname(__file__)
-                    file = os.path.join(path,'..','Worker','main.py')
+                    file = os.getcwd()
+                    file = os.path.normpath(os.getcwd()+os.sep + os.pardir)
+                    #file = os.path.join(path,'..','Worker','main.py')
+                    #../../Desktop/Worker/main.py
+                    file = os.path.join(file,'Worker','main.py')
+                    print(file)
                     pokrenutWorker = self.pokreniWorker(file)
+                    print("WORKER UPALJEN")
 
                 elif(komanda == "UGASI"):
                     sviDostupniWorkeri = self.provjeriDostupneWorkere(dostupniWorkeri)
                     ugaseniWorker = False
                     if(sviDostupniWorkeri):
-                        self.mutexWorker.acquire()
+                        #self.mutexWorker.acquire()
                         index = self.pronadjiWorkera(dostupniWorkeri)
                         ugaseniWorker = self.ugasiWorker(index,povezaniWorkeri,dostupniWorkeri)
-                        self.mutexWorker.release()
+                        #self.mutexWorker.release()
+                        
+                        print("WORKER UGASEN.")
             else:
                 ugasenKlijent = self.ugasiKlijenta(conn,povezaniKlijenti)
                 if(ugasenKlijent):
@@ -147,28 +168,35 @@ class LoadBalancer:
 
     def posaljiWorkeru(self,index,worker,dostupniWorkeri,poruka):
         try:
-            worker.sendall(poruka)
+            worker.send(poruka)
             dostupniWorkeri[index] = False
             return True
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     def pripremaZaSlanjeWorkeru(self,localBuffer,povezaniWorkeri,dostupniWorkeri):
         while True:
-            self.mutexBuffer.acquire()
-            if(len(localBuffer)>=10):
-                self.mutexWorker.acquire()
+            #self.mutexBuffer.acquire()
+            if(len(localBuffer)>=1):
+                #self.mutexWorker.acquire()
+                print("prosao if za worker bafer")
                 index = self.pronadjiWorkera(dostupniWorkeri)
+                print(f"pronasao sam workera:{index}")
                 if(index == -1):
-                    self.mutexBuffer.release()
-                    self.mutexWorker.release()
+                    #self.mutexBuffer.release()
+                    #self.mutexWorker.release()
                     time.sleep(2)
                     continue
                 worker = self.uzmiWorkera(index,povezaniWorkeri)
+                print(worker)
                 poruka = self.porukaZaWorkera(localBuffer)
-                self.mutexBuffer.release()
-                workerPoruka = self.posaljiWorkeru(index,worker,dostupniWorkeri,poruka)
-
+                print(poruka)
+                #self.mutexBuffer.release()
+                workerPoruka = self.posaljiWorkeru(index,worker,dostupniWorkeri,poruka.encode())
+                print(workerPoruka)
+                if(workerPoruka):
+                    print(f"Poslato workeru:{poruka}")
    
 
     

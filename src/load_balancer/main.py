@@ -15,12 +15,14 @@ if __name__ == '__main__':
 
 
         client_socket = loadBalancer.napraviSocket(client_address)
+        client_socket.listen(1)
         newThread = Thread(target=loadBalancer.clientListening,args=(client_socket,povezaniKlijenti,localBuffer,povezaniWorkeri,dostupniWorkeri))
         newThread.daemon = True
         newThread.start()
         
 
         worker_socket = loadBalancer.napraviSocket(worker_address)
+        worker_socket.listen(1)
         wThread = Thread(target=loadBalancer.workerListening,args=(worker_socket,povezaniWorkeri,dostupniWorkeri))
         wThread.daemon = True
         wThread.start()
