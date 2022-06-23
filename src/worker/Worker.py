@@ -13,8 +13,7 @@ class Worker:
 
     def connectToLB(self):
         try:
-            adresa = (self.adresa)
-            self.sock.connect(adresa)
+            self.sock.connect(self.adresa)
         except socket.error as error:
             print(str(error))
             return False
@@ -23,8 +22,11 @@ class Worker:
     def handle(self,id,code,value,dataset):
         db = DBFunctions()
         if db.dbConnect():
-            db.createTable(dataset)
+            print("konektovan sa bazom")
+            #db.createTable(dataset)
+            
             if db.entityExistance(id,dataset):
+                print("postoji entitet")
                 if code == "CODE_DIGITAL":
                     db.updateTable(id,code,value,dataset)
                 else:
@@ -33,21 +35,29 @@ class Worker:
                     if deadband >=2:
                         db.updateTable(id,code,value,dataset)
             else:
-                db.InsertIntoTable(id,code,value)
+                print("pokusavam da insertujem")
+                db.InsertIntoTable(id,code,value,dataset)
+                print("insertovano")
 
     def RecvProcess(self):
         while True:
             try:
-                data,adress = self.sock.recv(2048)
-            except ConnectionResetError:
+                data = self.sock.recv(2048)
+                print(data.decode())
+            except Exception as e:
+                print(e)
                 break
             if not data:
                 break
             else:
+                print("usao sam u else")
                 id = random.randint(0,200)
+                #WRITER: POSLATO:CODE:VALUE
+                #LB: CODE:VALUE
                 code = data.decode().split(":")[0]
                 value = data.decode().split(":")[1]
                 dataset = self.getDataSet(code)
+                print(f"{code},{value},{dataset}")
                 self.handle(id,code,value,dataset)
 
         self.sock.close()
