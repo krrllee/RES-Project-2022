@@ -1,12 +1,15 @@
 import sqlite3
+import os
 from datetime import datetime
 
 class DBFunctions:
 
    
-    def dbConnect(self,dataset):
+    def dbConnect(self):
         try:
-            self.connection = sqlite3.connect("database.db")
+            print(os.getcwd())
+            self.connection = sqlite3.connect("../Worker/database.db")
+            self.cur = self.connection.cursor()
         except:
             return False
         return True
@@ -26,14 +29,21 @@ class DBFunctions:
             pass
 
     def entityExistance(self,id,dataset):
-        retVal = self.connection.execute(f"""
+        try:
+            retVal = self.cur.execute(f"""
             SELECT id,code,value,timestamp
             FROM dataset{dataset}
             WHERE id = {id}
             """)
-        if(len(retVal.fetchall))>0:
-            return True
-        return False
+            res = self.cur.fetchall()
+            if(len(res)>0):
+                return True
+            else:
+                return False       
+        except Exception as e:
+            print(e)
+            return False
+        
 
     def updateTable(self,id,code,value,dataset):
         timestamp = datetime.now()
@@ -75,8 +85,12 @@ class DBFunctions:
 
     def InsertIntoTable(self,id,code,value,dataset):
         timestamp = datetime.now()
-        self.connection.execute(f"""
+        try:
+            self.cur.execute(f"""
             INSERT INTO dataset{dataset} (id,code,value,timestamp)
             VALUES ({id},'{code}',{value},'{timestamp}')
             """)
+        except sqlite3.IntegrityError: 
+            return 'Korisnik sa prosldjenim brojilom vec postoji'       
         self.connection.commit()
+        return "Uspjesno dodato"
